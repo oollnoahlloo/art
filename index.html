@@ -202,7 +202,6 @@
     .btn-success { background: var(--success); color: white; }
     .btn-success:hover { background: #059669; }
     .btn-danger { background: var(--danger); color: white; }
-    .btn-warning { background: var(--secondary); color: white; }
 
     /* Secret Group Submission Box */
     .secret-box {
@@ -260,7 +259,7 @@
     .secret-rank-row:hover { background: #f8fafc; }
     .secret-art-info { display: flex; align-items: center; gap: 0.85rem; }
     .secret-mini-img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
-    .rank-select { width: 100px; font-weight: 700; text-align: center; }
+    .rank-select { width: 115px; font-weight: 700; text-align: center; }
     .rank-select.duplicate { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
 
     /* Teacher Dashboard */
@@ -340,6 +339,16 @@
       background: #f8fafc; padding: 0.75rem 1rem; border-radius: 10px;
       font-size: 0.93rem; color: #334155; border-left: 4px solid var(--secondary); margin-top: 0.4rem;
     }
+
+    .img-upload-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
@@ -370,7 +379,6 @@
   <!-- 2. 모둠별 비밀 제출 섹션 -->
   <section id="submit" class="section">
     <div class="secret-box">
-      <!-- 단계 A: 모둠 선택 화면 (잠금 상태) -->
       <div id="stepSelectGroup">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
           <h2 style="color:var(--primary);">🤫 모둠별 비밀 순위 입력</h2>
@@ -401,7 +409,6 @@
         </div>
       </div>
 
-      <!-- 단계 B: 특정 모둠 입력 화면 -->
       <div id="stepInputForm" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border); padding-bottom:1rem; margin-bottom:1rem;">
           <div>
@@ -417,14 +424,13 @@
 
         <div id="secretRankList"></div>
 
-        <div style="margin-top:1.5rem; display:flex; gap:0.8rem; justify-content:flex-end;">
+        <div style="margin-top:1.5rem;">
           <button class="btn btn-success" style="width:100%; padding:0.95rem; font-size:1.05rem;" onclick="submitGroupRanks()">
             🔒 입력 완료 및 비밀 제출하기 (화면 잠금)
           </button>
         </div>
       </div>
 
-      <!-- 단계 C: 제출 완료 및 코드 복사 화면 -->
       <div id="stepSubmittedDone" style="display:none; text-align:center; padding:1.5rem 0;">
         <div style="font-size:3rem; margin-bottom:0.5rem;">✅</div>
         <h2 id="doneGroupTitle" style="color:var(--success); font-size:1.5rem;">1모둠 제출 완료!</h2>
@@ -468,13 +474,14 @@
       <div class="teacher-subtabs">
         <button class="subtab-btn active" id="subtab-calc" onclick="switchTeacherSubtab('calc')">📊 1단계: 모둠 제출 현황 & 우승 계산</button>
         <button class="subtab-btn" id="subtab-reveal" onclick="switchTeacherSubtab('reveal')">💰 2단계: 실제 경매가 & 반전 해설 공개</button>
+        <button class="subtab-btn" id="subtab-images" onclick="switchTeacherSubtab('images')">🖼️ 사진 파일 직접 넣기 (방화벽 대비)</button>
       </div>
 
-      <!-- 선생님 서브탭 1: 모둠 결과 계산 -->
+      <!-- 선생님 서브탭 1 -->
       <div id="teacherSubCalc">
         <div class="intro-banner" style="margin-bottom:1rem;">
           <h3>📋 모둠별 제출 현황 및 평균 계산</h3>
-          <p>모둠들이 입력한 순위를 확인하고 <b>[✨ 전체 평균 및 우승 모둠 계산하기]</b>를 눌러 결과를 발표하세요. (아직 실제 경매가는 노출되지 않습니다.)</p>
+          <p>모둠들이 입력한 순위를 확인하고 <b>[✨ 전체 평균 및 우승 모둠 계산하기]</b>를 눌러 결과를 발표하세요.</p>
           
           <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
             <button class="btn btn-success" onclick="calculateTeacherResults()">✨ 전체 평균 및 우승 모둠 계산하기</button>
@@ -483,7 +490,7 @@
           </div>
 
           <div id="importCodeBox" style="display:none; margin-top:1rem; background:#f8fafc; padding:1rem; border-radius:10px; border:1px solid var(--border);">
-            <p style="font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">학생들이 보낸 제출 코드를 아래에 붙여넣고 [불러오기]를 누르세요 (여러 줄 한 번에 가능):</p>
+            <p style="font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">학생들이 보낸 제출 코드를 아래에 붙여넣고 [불러오기]를 누르세요:</p>
             <textarea id="importTextarea" rows="3" style="width:100%;" placeholder="예: ARTGAME_G1:[4,2,7,1,5,8,3,6,9,10]"></textarea>
             <button class="btn btn-primary" style="margin-top:0.5rem;" onclick="importGroupCodes()">불러오기</button>
           </div>
@@ -496,13 +503,25 @@
         <div id="teacherWinnerResult"></div>
       </div>
 
-      <!-- 선생님 서브탭 2: 실제 가격 및 반전 해설 -->
+      <!-- 선생님 서브탭 2 -->
       <div id="teacherSubReveal" style="display:none;">
         <div class="intro-banner" style="border-left-color:var(--secondary);">
           <h3 style="color:#b45309;">💰 실제 경매 낙찰가 순위 (1위 ~ 10위)</h3>
           <p>학생들에게 프로젝터/TV로 이 화면을 보여주며 10위부터 거꾸로 설명해 주시면 반전 재미가 극대화됩니다!</p>
         </div>
         <div id="teacherRevealList"></div>
+      </div>
+
+      <!-- 선생님 서브탭 3: 이미지 직접 업로드 -->
+      <div id="teacherSubImages" style="display:none;">
+        <div class="intro-banner">
+          <h3>🖼️ 학교 인터넷(방화벽)에서 그림이 안 보일 때 해결 방법</h3>
+          <p>
+            <b>방법 A (가장 추천 - 깃허브 사용 시):</b> 깃허브 저장소에 <code>index.html</code>과 함께 <code>1.jpg</code>, <code>2.jpg</code> ~ <code>10.jpg</code> 이미지 파일 10장을 같은 위치에 올리면 자동으로 모든 기기에서 보입니다.<br>
+            <b>방법 B (교실 PC 단독 사용 시):</b> 아래에서 컴퓨터에 저장된 그림 파일을 선택하면 즉시 화면에 적용됩니다.
+          </p>
+        </div>
+        <div style="background:white; border-radius:16px; padding:1.2rem; border:1px solid var(--border);" id="imageUploaderList"></div>
       </div>
     </div>
   </section>
@@ -525,20 +544,16 @@
 </div>
 
 <script>
-  // 이미지 로딩을 100% 보장하기 위한 헬퍼:
-  // 1순위: 로컬 images/1.jpg ~ 10.jpg (오프라인 대비)
-  // 2순위: 위키미디어 차단을 우회하는 wsrv.nl 이미지 프록시
-  // 3순위: 깔끔한 작품 안내 SVG 카드
-  function proxyImg(url) {
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=800&output=jpg`;
-  }
+  // 브라우저에 직접 업로드한 커스텀 이미지 저장소
+  let customImages = JSON.parse(localStorage.getItem('artCustomImages') || '{}');
 
   function getFallbackSvg(no, title) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
       <rect width="600" height="450" fill="#eef2ff"/>
       <rect x="20" y="20" width="560" height="410" rx="20" fill="none" stroke="#4f46e5" stroke-width="4" stroke-dasharray="10,10"/>
-      <text x="50%" y="44%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="bold" fill="#4f46e5">작품 #${no}</text>
-      <text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#1e293b">${title}</text>
+      <text x="50%" y="42%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="bold" fill="#4f46e5">작품 #${no}</text>
+      <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#1e293b">${title}</text>
+      <text x="50%" y="66%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#64748b">(선생님 페이지에서 ${no}.jpg 사진을 넣어주세요)</text>
     </svg>`;
     return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
   }
@@ -553,7 +568,9 @@
       hint: "재료: 실제 바나나 1개, 은색 덕트 테이프",
       price: "약 86억 원 ($620만, 2024년 소더비 경매)",
       point: "반전 ⑥ 마트에서 산 500원짜리 진짜 바나나를 테이프로 벽에 붙인 작품! '미술품의 가치는 물질이 아니라 작가의 아이디어에 있다'는 질문을 던지며 무려 86억 원에 낙찰되었습니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/5/5d/Comedian_%28artwork%29.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/5/5d/Comedian_%28artwork%29.jpg"
+      ]
     },
     {
       displayNo: 2,
@@ -563,7 +580,9 @@
       hint: "재료: 캔버스에 유화 (114 × 146.4 cm)",
       price: "약 2,000억 원 ($1.79억, 2015년 크리스티 경매)",
       point: "반전 ① '얼굴과 몸이 삐뚤빼뚤해서 못 그린 것 같아요!'라고 느끼기 쉽지만, 여러 각도에서 본 모습을 한 화면에 담은 입체파 거장 피카소의 대표작입니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/7/75/Les_Femmes_d%27Alger%2C_Pablo_Picasso%2C_1955%2C_version_O.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/7/75/Les_Femmes_d%27Alger%2C_Pablo_Picasso%2C_1955%2C_version_O.jpg"
+      ]
     },
     {
       displayNo: 3,
@@ -573,7 +592,9 @@
       hint: "재료: 캔버스에 유성 페인트와 크레용 (172 × 228 cm)",
       price: "약 810억 원 ($7,050만, 2015년 소더비 경매)",
       point: "반전 ⑤ 회색 칠판에 하얀 분필로 용수철 낙서만 빙글빙글 그린 것처럼 보이는 작품! 초등학생들이 꼴찌(10위)로 가장 많이 예상하지만, 어린아이 같은 순수한 선의 리듬을 표현해 800억 원이 넘습니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/8/87/Cy_Twombly_-_Untitled_%28New_York_City%29%2C_1968.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/8/87/Cy_Twombly_-_Untitled_%28New_York_City%29%2C_1968.jpg"
+      ]
     },
     {
       displayNo: 4,
@@ -583,7 +604,9 @@
       hint: "재료: 호두나무 패널에 유화 (65.6 × 45.4 cm)",
       price: "약 5,000억 원 ($4.5억, 2017년 크리스티 경매)",
       point: "전 세계 역사상 최고가 경매 기록 1위! 모나리자를 그린 르네상스 최고 거장 다 빈치의 진품으로 알려져 사우디아라비아 왕자가 구매했습니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/640px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg"
+      ]
     },
     {
       displayNo: 5,
@@ -593,7 +616,9 @@
       hint: "재료: 스테인리스 스틸 (높이 약 104 cm)",
       price: "약 1,085억 원 ($9,110만, 2019년 크리스티 경매)",
       point: "반전 ③ '마트에서 파는 은박 풍선 아니에요?' 바람을 불어 넣은 비닐 풍선처럼 보이지만, 거울처럼 반짝이는 단단한 스테인리스 강철로 정교하게 깎아 만든 조각입니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/5/58/Rabbit_%28Jeff_Koons%29.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/5/58/Rabbit_%28Jeff_Koons%29.jpg"
+      ]
     },
     {
       displayNo: 6,
@@ -603,7 +628,9 @@
       hint: "재료: 캔버스에 스프레이 페인트와 아크릴",
       price: "약 301억 원 (£1,858만, 2021년 소더비 경매)",
       point: "스토리 반전! 2018년 경매에서 16억 원에 낙찰되자마자 액자 속에 숨겨둔 파쇄기가 작동해 그림 절반이 갈려버렸습니다. 이 사건 덕분에 세계적인 화제가 되어 3년 뒤 18배인 301억 원에 다시 팔렸습니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/0/0a/Love_is_in_the_Bin.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/0/0a/Love_is_in_the_Bin.jpg"
+      ]
     },
     {
       displayNo: 7,
@@ -613,7 +640,9 @@
       hint: "재료: 청동 조각 (높이 약 183 cm)",
       price: "약 1,200억 원 ($1.04억, 2010년 소더비 경매)",
       point: "반전 ② '철사로 뼈대만 앙상하게 만들어 놓은 것 같아요.' 전쟁의 아픔을 겪은 뒤 껍데기를 다 덜어내고 묵묵히 걸어가는 인간의 강인한 의지를 표현한 명작입니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/7/75/L%27Homme_qui_marche_I.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/7/75/L%27Homme_qui_marche_I.jpg"
+      ]
     },
     {
       displayNo: 8,
@@ -623,7 +652,9 @@
       hint: "재료: 캔버스에 유화 (236 × 206 cm)",
       price: "약 980억 원 ($8,690만, 2012년 크리스티 경매)",
       point: "반전 ④ '색종이 세 장 붙여놓은 것 같아요! 저도 5분 만에 그리겠어요.' 하지만 가로·세로 2m가 넘는 거대한 화면 앞에 실제로 서면 따뜻한 색채가 관람객을 감싸며 깊은 감동과 눈물을 자아내는 추상화입니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/5/5e/Orange%2C_Red%2C_Yellow.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/5/5e/Orange%2C_Red%2C_Yellow.jpg"
+      ]
     },
     {
       displayNo: 9,
@@ -633,7 +664,9 @@
       hint: "재료: 면에 유화 (254 × 254 cm, 두 폭 그림)",
       price: "약 132억 원 (8,800만 홍콩달러, 2019년 크리스티 경매)",
       point: "한국 미술의 자존심! 푸른 점들을 수만 번 붓으로 찍어 끝없이 펼쳐진 우주의 신비를 담아냈습니다. 한국 미술품 경매 역사상 최초로 100억 원을 돌파한 최고가 작품입니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/en/0/02/Universe_5-IV-71_%23200_by_Kim_Whanki.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/en/0/02/Universe_5-IV-71_%23200_by_Kim_Whanki.jpg"
+      ]
     },
     {
       displayNo: 10,
@@ -643,11 +676,43 @@
       hint: "재료: 판지에 파스텔 (79 × 59 cm)",
       price: "약 1,355억 원 ($1.2억, 2012년 소더비 경매)",
       point: "교과서나 패러디로 너무 자주 봐서 오히려 가격을 낮게 예상하는 친구들이 많습니다. 자연의 거대한 비명을 느끼며 불안해하는 현대인의 마음을 강렬하게 표현했습니다.",
-      rawImg: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg"
+      webUrls: [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/500px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg"
+      ]
     }
   ];
 
-  // 모둠 제출 데이터 저장소 (브라우저 localStorage 연동으로 새로고침해도 유지)
+  // 다중 폴백 이미지 로더:
+  // 1순위: 선생님이 직접 업로드한 사진 (customImages)
+  // 2순위: 같은 폴더의 1.jpg ~ 10.jpg (깃허브에 사진 같이 올렸을 때 100% 동작)
+  // 3순위: 같은 폴더의 1.png ~ 10.png
+  // 4순위: 위키미디어 원본 URL (일반 인터넷망용)
+  // 5순위: 안내 SVG 카드
+  function getInitialImgSrc(art) {
+    if (customImages[art.displayNo]) return customImages[art.displayNo];
+    return `${art.displayNo}.jpg`;
+  }
+
+  function handleImgError(imgEl, displayNo) {
+    const art = artworks.find(a => a.displayNo === displayNo);
+    const step = parseInt(imgEl.dataset.step || "0");
+
+    if (step === 0) {
+      imgEl.dataset.step = "1";
+      imgEl.src = `${displayNo}.png`;
+    } else if (step === 1) {
+      imgEl.dataset.step = "2";
+      imgEl.src = `images/${displayNo}.jpg`;
+    } else if (step === 2 && art.webUrls && art.webUrls[0]) {
+      imgEl.dataset.step = "3";
+      imgEl.src = art.webUrls[0];
+    } else {
+      imgEl.onerror = null;
+      imgEl.src = getFallbackSvg(displayNo, art.title);
+    }
+  }
+
+  // 모둠 제출 데이터 저장소
   let submissions = JSON.parse(localStorage.getItem('artGameSubmissions') || '{}');
   let activeGroupNo = null;
 
@@ -663,7 +728,7 @@
     document.getElementById('nav-' + tabId).classList.add('active');
 
     if (tabId === 'submit') {
-      finishAndLock(); // 제출 탭 들어올 때는 항상 잠금(초기) 화면으로 시작
+      finishAndLock();
     }
     if (tabId === 'teacher' && document.getElementById('teacherContent').style.display === 'block') {
       renderTeacherSummaryTable();
@@ -677,8 +742,8 @@
       <div class="art-card" onclick="openModal(${art.displayNo})">
         <div class="art-img-wrap">
           <span class="art-badge">작품 #${art.displayNo}</span>
-          <img src="${proxyImg(art.rawImg)}" alt="${art.title}" 
-               onerror="this.onerror=null; this.src='images/${art.displayNo}.jpg'; this.onerror=function(){this.src=getFallbackSvg(${art.displayNo}, '${art.title}');};" />
+          <img src="${getInitialImgSrc(art)}" data-step="0" alt="${art.title}" 
+               onerror="handleImgError(this, ${art.displayNo})" />
         </div>
         <div class="art-info">
           <div>
@@ -696,12 +761,10 @@
     const art = artworks.find(a => a.displayNo === displayNo);
     if (!art) return;
     const imgEl = document.getElementById('modalImg');
-    imgEl.src = proxyImg(art.rawImg);
-    imgEl.onerror = function() {
-      this.onerror = null;
-      this.src = `images/${art.displayNo}.jpg`;
-      this.onerror = function() { this.src = getFallbackSvg(art.displayNo, art.title); };
-    };
+    imgEl.dataset.step = "0";
+    imgEl.onerror = function() { handleImgError(this, displayNo); };
+    imgEl.src = getInitialImgSrc(art);
+
     document.getElementById('modalBadge').textContent = `작품 #${art.displayNo}`;
     document.getElementById('modalTitle').textContent = art.title;
     document.getElementById('modalArtist').textContent = `${art.artist} · ${art.hint}`;
@@ -752,8 +815,8 @@
     listEl.innerHTML = artworks.map(art => `
       <div class="secret-rank-row">
         <div class="secret-art-info">
-          <img class="secret-mini-img" src="${proxyImg(art.rawImg)}" alt="" 
-               onerror="this.onerror=null; this.src=getFallbackSvg(${art.displayNo}, '');" />
+          <img class="secret-mini-img" src="${getInitialImgSrc(art)}" data-step="0" alt="" 
+               onerror="handleImgError(this, ${art.displayNo})" />
           <div>
             <div style="font-weight:800; font-size:0.98rem;"><span style="color:var(--primary);">#${art.displayNo}</span> ${art.title}</div>
             <div style="font-size:0.82rem; color:var(--muted);">${art.artist}</div>
@@ -794,7 +857,6 @@
       return;
     }
 
-    // 작품 #1 ~ #10 순서대로 순위 배열 저장
     const rankArray = artworks.map(art => {
       const sel = document.querySelector(`#secretRankList .rank-select[data-art="${art.displayNo}"]`);
       return parseInt(sel.value);
@@ -803,7 +865,6 @@
     submissions[activeGroupNo] = rankArray;
     saveSubmissions();
 
-    // 입력 폼 즉시 파괴하여 화면에 흔적 남기지 않음
     document.getElementById('secretRankList').innerHTML = '';
     document.getElementById('stepInputForm').style.display = 'none';
     document.getElementById('stepSubmittedDone').style.display = 'block';
@@ -835,6 +896,7 @@
       document.getElementById('teacherContent').style.display = 'block';
       renderTeacherSummaryTable();
       renderTeacherReveal();
+      renderImageUploader();
     } else {
       alert('비밀번호가 일치하지 않습니다. (초기 비밀번호: 1234)');
     }
@@ -849,8 +911,10 @@
   function switchTeacherSubtab(sub) {
     document.getElementById('subtab-calc').classList.toggle('active', sub === 'calc');
     document.getElementById('subtab-reveal').classList.toggle('active', sub === 'reveal');
+    document.getElementById('subtab-images').classList.toggle('active', sub === 'images');
     document.getElementById('teacherSubCalc').style.display = sub === 'calc' ? 'block' : 'none';
     document.getElementById('teacherSubReveal').style.display = sub === 'reveal' ? 'block' : 'none';
+    document.getElementById('teacherSubImages').style.display = sub === 'images' ? 'block' : 'none';
   }
 
   function toggleImportBox() {
@@ -925,7 +989,6 @@
       return;
     }
 
-    // 작품별 평균 순위
     const avgArr = artworks.map((art, idx) => {
       const sum = groupNums.reduce((acc, g) => acc + submissions[g][idx], 0);
       const avg = sum / groupNums.length;
@@ -933,7 +996,6 @@
       return avg;
     });
 
-    // 모둠별 오차 합계 계산
     const scores = groupNums.map(g => {
       let diffAvg = 0;
       let diffReal = 0;
@@ -987,8 +1049,8 @@
     document.getElementById('teacherRevealList').innerHTML = sorted.map(art => `
       <div class="reveal-card">
         <div class="real-rank-badge"><span>실제 순위</span>${art.realRank}위</div>
-        <img class="reveal-thumb" src="${proxyImg(art.rawImg)}" alt="${art.title}"
-             onerror="this.onerror=null; this.src='images/${art.displayNo}.jpg'; this.onerror=function(){this.src=getFallbackSvg(${art.displayNo}, '${art.title}');};" />
+        <img class="reveal-thumb" src="${getInitialImgSrc(art)}" data-step="0" alt="${art.title}"
+             onerror="handleImgError(this, ${art.displayNo})" />
         <div>
           <div style="font-size:0.85rem; color:#4f46e5; font-weight:800;">학생 화면 번호: 작품 #${art.displayNo}</div>
           <h3 style="font-size:1.2rem; margin:0.15rem 0;">${art.title} <span style="font-size:0.9rem; font-weight:500; color:var(--muted);">(${art.artist})</span></h3>
@@ -997,6 +1059,59 @@
         </div>
       </div>
     `).join('');
+  }
+
+  // 선생님 PC에서 직접 사진 선택해 넣는 업로더
+  function renderImageUploader() {
+    const container = document.getElementById('imageUploaderList');
+    container.innerHTML = artworks.map(art => `
+      <div class="img-upload-row">
+        <div>
+          <b>작품 #${art.displayNo}</b> · ${art.title} <span style="color:var(--muted); font-size:0.85rem;">(깃허브 파일명: <code>${art.displayNo}.jpg</code>)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="file" accept="image/*" onchange="uploadLocalArtImage(event, ${art.displayNo})" />
+          ${customImages[art.displayNo] ? `<button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="removeCustomImage(${art.displayNo})">삭제</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function uploadLocalArtImage(event, displayNo) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      // 이미지 용량 축소 후 저장
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxW = 800;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        customImages[displayNo] = canvas.toDataURL('image/jpeg', 0.85);
+        try {
+          localStorage.setItem('artCustomImages', JSON.stringify(customImages));
+        } catch (err) {
+          alert("브라우저 저장 용량이 가득 찼습니다. 깃허브에 1.jpg ~ 10.jpg 파일을 직접 올리시는 것을 권장합니다.");
+        }
+        renderGallery();
+        renderTeacherReveal();
+        renderImageUploader();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeCustomImage(displayNo) {
+    delete customImages[displayNo];
+    localStorage.setItem('artCustomImages', JSON.stringify(customImages));
+    renderGallery();
+    renderTeacherReveal();
+    renderImageUploader();
   }
 
   // 초기 실행
